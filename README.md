@@ -2,23 +2,92 @@
 
 A production-ready subscription management service built with **Ports and Adapters (Hexagonal Architecture)** - a custom Java framework without Spring Boot dependencies.
 
+## 📑 Table of Contents
+
+- [Architecture](#-architecture)
+- [Quick Start](#-quick-start)
+- [API Endpoints](#-api-endpoints)
+- [Testing APIs](#-testing-apis)
+- [Configuration](#-configuration)
+- [Project Structure](#-project-structure)
+- [Documentation](#-documentation)
+- [Postman Collection](#postman-collection)
+- [Development](#-development)
+- [Docker](#-docker)
+- [Security Features](#-security-features)
+- [Monitoring](#-monitoring)
+
+---
+
+## 🔗 Quick Links
+
+- 📖 [Architecture Documentation](ARCHITECTURE.md) - Detailed system architecture
+- 📋 [API Documentation](API_DOCUMENTATION.md) - Complete API reference
+- 🗄️ [Database Design](DATABASE_DESIGN.md) - Database schema and design
+- 🚀 [Quick Start Guide](QUICK_START.md) - Step-by-step setup
+- 📬 [Postman Setup Guide](POSTMAN_SETUP.md) - Postman collection setup
+- 📦 [Postman Collection](Subscription_Service.postman_collection.json) - Import and test all APIs
+
 ## 🏗️ Architecture
 
-This service follows **Hexagonal Architecture (Ports and Adapters)** pattern:
+This service follows **Hexagonal Architecture (Ports and Adapters)** pattern, providing a clean separation of concerns and framework independence.
 
-- **Domain Layer**: Pure business models (no dependencies)
-- **Application Layer**: Use cases and business logic (depends on ports/interfaces)
-- **Infrastructure Layer**: Adapters (HTTP, Database, Security, Cache)
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Client Layer                           │
+│  (React Frontend, Mobile Apps, Hardware Devices)         │
+└───────────────────────┬─────────────────────────────────┘
+                        │
+                        │ HTTP/REST API
+                        │
+┌───────────────────────▼─────────────────────────────────┐
+│              Infrastructure Layer (Adapters)            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
+│  │ HTTP Adapter │  │  DB Adapter  │  │ Cache Adapter│ │
+│  │ (Controllers)│  │ (JDBC Repos) │  │  (Redis)     │ │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘ │
+└─────────┼──────────────────┼─────────────────┼─────────┘
+          │                  │                 │
+          │                  │                 │
+┌─────────▼──────────────────▼─────────────────▼─────────┐
+│          Application Layer (Use Cases)                 │
+│  ┌─────────────────────────────────────────────────┐  │
+│  │  Ports (Interfaces)                             │  │
+│  │  • UserServicePort                              │  │
+│  │  • SubscriptionServicePort                      │  │
+│  │  • BillingServicePort                           │  │
+│  │  • DeviceServicePort                            │  │
+│  └─────────────────────────────────────────────────┘  │
+└───────────────────────┬───────────────────────────────┘
+                        │
+┌───────────────────────▼───────────────────────────────┐
+│              Domain Layer (Business Models)            │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │   User   │  │Subscription│ │  Device  │           │
+│  │  Model   │  │   Model   │ │  Model   │           │
+│  └──────────┘  └──────────┘  └──────────┘           │
+└───────────────────────────────────────────────────────┘
+```
+
+### Architecture Layers
+
+- **Domain Layer**: Pure business models with no external dependencies
+- **Application Layer**: Use cases and business logic (depends on ports/interfaces only)
+- **Infrastructure Layer**: Adapters implementing ports (HTTP, Database, Security, Cache)
 
 ### Key Features
 
 - ✅ **Clean Architecture** - Ports and Adapters pattern
-- ✅ **Framework Independent** - No Spring Boot, custom framework
+- ✅ **Framework Independent** - Custom framework without Spring Boot
 - ✅ **Security** - JWT authentication, rate limiting, password hashing
 - ✅ **Performance** - Redis caching, connection pooling
 - ✅ **Monitoring** - Health checks, metrics collection
 - ✅ **Reliability** - Transaction management, error handling
 - ✅ **Deployment** - Docker support, Docker Compose
+
+📖 **For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md)**
 
 ## 🚀 Quick Start
 
@@ -29,13 +98,13 @@ This service follows **Hexagonal Architecture (Ports and Adapters)** pattern:
 - Redis (optional, for caching)
 - PostgreSQL/MySQL/H2 (for database)
 
-### Run with Gradle
+### Method 1: Using Gradle (Recommended)
 
 ```bash
 ./gradlew run
 ```
 
-### Run with Docker
+### Method 2: Using Docker Compose
 
 ```bash
 # Start all services (app + Redis + PostgreSQL)
@@ -48,15 +117,31 @@ docker-compose logs -f app
 docker-compose down
 ```
 
-### Run Locally
+### Method 3: Using Startup Script
 
 ```bash
-# Start Redis (if using caching)
-docker run -d -p 6379:6379 --name redis redis:latest
-
-# Run application
-./gradlew run
+./run.sh
 ```
+
+### Method 4: Build and Run JAR
+
+```bash
+./gradlew jar
+java -jar build/libs/subscription-service-1.0.0-SNAPSHOT.jar
+```
+
+### Verify It's Running
+
+```bash
+curl http://localhost:8080/health
+```
+
+Expected response:
+```json
+{"status":"UP","service":"subscription-service"}
+```
+
+📖 **For detailed quick start guide, see [QUICK_START.md](QUICK_START.md)**
 
 ## 📋 API Endpoints
 
@@ -104,7 +189,23 @@ rateLimit:
 
 ## 🧪 Testing APIs
 
-### Register User
+### Using Postman (Recommended)
+
+The easiest way to test all APIs is using the included Postman collection:
+
+1. **Import Collection**: Open Postman → Import → Select `Subscription_Service.postman_collection.json`
+2. **Setup Environment**: Create environment with `baseUrl: http://localhost:8080`
+3. **Start Testing**: 
+   - Begin with **Authentication → Login** (uses default admin credentials)
+   - Token is automatically saved for subsequent requests
+   - Explore all endpoints organized by category
+
+📦 **Postman Collection**: [`Subscription_Service.postman_collection.json`](Subscription_Service.postman_collection.json)  
+📖 **Setup Guide**: [POSTMAN_SETUP.md](POSTMAN_SETUP.md)
+
+### Using cURL
+
+#### Register User
 ```bash
 curl -X POST http://localhost:8080/api/auth/register \
   -H "Content-Type: application/json" \
@@ -116,7 +217,7 @@ curl -X POST http://localhost:8080/api/auth/register \
   }'
 ```
 
-### Login
+#### Login
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
@@ -126,22 +227,24 @@ curl -X POST http://localhost:8080/api/auth/login \
   }'
 ```
 
-### Get User (with token)
+#### Get User (with token)
 ```bash
 TOKEN="your-access-token"
 curl http://localhost:8080/api/users/1 \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-### Health Check
+#### Health Check
 ```bash
 curl http://localhost:8080/health/detailed
 ```
 
-### Metrics
+#### Metrics
 ```bash
 curl http://localhost:8080/metrics
 ```
+
+📖 **For complete API documentation with all endpoints, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md)**
 
 ## 📁 Project Structure
 
@@ -213,11 +316,64 @@ docker-compose up -d
 
 ## 📚 Documentation
 
-- `ARCHITECTURE.md` - Detailed architecture documentation
-- `DATABASE_DESIGN.md` - Database schema and design
-- `API_DOCUMENTATION.md` - Complete API documentation
-- `QUICK_START.md` - Quick start guide
-- `POSTMAN_SETUP.md` - Postman collection setup
+### Essential Documentation
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Comprehensive architecture documentation
+  - System architecture overview
+  - Architecture patterns (Layered, DDD, Repository, Service Layer)
+  - Security architecture (Authentication & Authorization flows)
+  - Data flow diagrams
+  - Database architecture and ER diagrams
+  - Transaction management
+  - Deployment architecture
+  - Technology stack details
+
+- **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)** - Complete API reference
+  - All API endpoints with request/response examples
+  - Code flow diagrams
+  - Component interactions
+  - Authentication flows
+  - Role-based access control
+
+- **[DATABASE_DESIGN.md](DATABASE_DESIGN.md)** - Database schema documentation
+  - Complete database schema
+  - Entity relationships
+  - Table structures and indexes
+  - Normalization strategy
+  - Query optimization
+
+- **[QUICK_START.md](QUICK_START.md)** - Quick start guide
+  - Step-by-step setup instructions
+  - Configuration guide
+  - Troubleshooting tips
+
+- **[POSTMAN_SETUP.md](POSTMAN_SETUP.md)** - Postman collection guide
+  - How to import the Postman collection
+  - Environment variables setup
+  - Testing workflow
+  - Example requests
+
+### Postman Collection
+
+The project includes a complete Postman collection for testing all APIs:
+
+📦 **File**: [`Subscription_Service.postman_collection.json`](Subscription_Service.postman_collection.json)
+
+**Features:**
+- ✅ All API endpoints organized by category
+- ✅ Pre-configured authentication flows
+- ✅ Auto-save token functionality
+- ✅ Environment variables setup
+- ✅ Example requests for all endpoints
+- ✅ Role-based testing scenarios
+
+**Quick Import:**
+1. Open Postman
+2. Click **Import** → Select `Subscription_Service.postman_collection.json`
+3. Create environment with `baseUrl: http://localhost:8080`
+4. Start testing!
+
+📖 **For detailed Postman setup instructions, see [POSTMAN_SETUP.md](POSTMAN_SETUP.md)**
 
 ## 🛠️ Development
 

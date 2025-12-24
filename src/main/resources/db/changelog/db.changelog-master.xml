@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Include all changelog files -->
+    <include file="db/changelog/changes/001-create-roles-table.xml"/>
+    <include file="db/changelog/changes/002-create-users-table.xml"/>
+    <include file="db/changelog/changes/003-create-user-roles-table.xml"/>
+    <include file="db/changelog/changes/004-create-features-table.xml"/>
+    <include file="db/changelog/changes/005-create-devices-table.xml"/>
+    <include file="db/changelog/changes/006-create-subscriptions-table.xml"/>
+    <include file="db/changelog/changes/007-create-subscription-features-table.xml"/>
+    <include file="db/changelog/changes/008-create-user-subscriptions-table.xml"/>
+    <include file="db/changelog/changes/009-create-user-devices-table.xml"/>
+    <include file="db/changelog/changes/010-create-billings-table.xml"/>
+    <include file="db/changelog/changes/011-create-audit-logs-table.xml"/>
+    <include file="db/changelog/changes/012-remove-redundant-user-device-columns.xml"/>
+    <include file="db/changelog/changes/013-remove-device-serial-column.xml"/>
+    <include file="db/changelog/changes/014-add-device-id-back-to-user-devices.xml"/>
+    <include file="db/changelog/changes/015-optimize-indexes.xml"/>
+    <include file="db/changelog/changes/016-remove-unused-user-id-from-user-devices.xml"/>
+    
+    <!-- Initial data -->
+    <include file="db/changelog/data/001-initial-roles.xml"/>
+    <include file="db/changelog/data/002-initial-users.xml"/>
+    <include file="db/changelog/data/003-initial-features.xml"/>
+    <include file="db/changelog/data/004-initial-devices.xml"/>
+    <include file="db/changelog/data/005-initial-subscriptions.xml"/>
+
+</databaseChangeLog>
+

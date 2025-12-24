@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="013-remove-device-serial-column" author="system">
+        <comment>Remove device_serial column from devices table. 
+        Device is a template/model, not a physical device. 
+        Physical device serials are stored in user_devices table.</comment>
+        
+        <!-- Drop unique constraint/index on device_serial if it exists -->
+        <dropIndex indexName="idx_devices_serial" tableName="devices" ifExists="true"/>
+        
+        <!-- Drop the device_serial column -->
+        <dropColumn tableName="devices" columnName="device_serial"/>
+    </changeSet>
+
+</databaseChangeLog>
+
+

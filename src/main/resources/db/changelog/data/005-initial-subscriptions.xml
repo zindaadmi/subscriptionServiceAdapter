@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="005-initial-subscriptions" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM subscriptions WHERE name = 'Premium Streaming'
+            </sqlCheck>
+        </preConditions>
+        
+        <!-- Premium Streaming for Smart TV -->
+        <insert tableName="subscriptions">
+            <column name="name" value="Premium Streaming"/>
+            <column name="description" value="Access to all premium content including 4K movies and exclusive shows"/>
+            <column name="device_id" valueComputed="(SELECT id FROM devices WHERE name = 'Smart TV Pro 4K' LIMIT 1)"/>
+            <column name="base_price" valueNumeric="150.00"/>
+            <column name="subscription_level" value="PREMIUM"/>
+            <column name="billing_cycle" value="MONTHLY"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <!-- Basic Streaming for Smart TV -->
+        <insert tableName="subscriptions">
+            <column name="name" value="Basic Streaming"/>
+            <column name="description" value="Access to standard definition content"/>
+            <column name="device_id" valueComputed="(SELECT id FROM devices WHERE name = 'Smart TV Pro 4K' LIMIT 1)"/>
+            <column name="base_price" valueNumeric="99.00"/>
+            <column name="subscription_level" value="BASIC"/>
+            <column name="billing_cycle" value="MONTHLY"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <!-- Yearly Premium Plan -->
+        <insert tableName="subscriptions">
+            <column name="name" value="Yearly Premium Plan"/>
+            <column name="description" value="Premium streaming with 12-month commitment - Save 20%"/>
+            <column name="device_id" valueComputed="(SELECT id FROM devices WHERE name = 'Smart TV Pro 4K' LIMIT 1)"/>
+            <column name="base_price" valueNumeric="1440.00"/>
+            <column name="subscription_level" value="PREMIUM"/>
+            <column name="billing_cycle" value="YEARLY"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <!-- Mobile Premium -->
+        <insert tableName="subscriptions">
+            <column name="name" value="Mobile Premium"/>
+            <column name="description" value="Premium streaming optimized for mobile devices"/>
+            <column name="device_id" valueComputed="(SELECT id FROM devices WHERE name = 'Mobile Streaming Device' LIMIT 1)"/>
+            <column name="base_price" valueNumeric="120.00"/>
+            <column name="subscription_level" value="PREMIUM"/>
+            <column name="billing_cycle" value="MONTHLY"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <!-- Link features to Premium Streaming -->
+        <sql>
+            INSERT INTO subscription_features (subscription_id, feature_id)
+            SELECT s.id, f.id
+            FROM subscriptions s, features f
+            WHERE s.name = 'Premium Streaming' 
+            AND f.name IN ('HD Streaming', '4K Streaming', 'Multiple Devices')
+        </sql>
+        
+        <!-- Link features to Basic Streaming -->
+        <sql>
+            INSERT INTO subscription_features (subscription_id, feature_id)
+            SELECT s.id, f.id
+            FROM subscriptions s, features f
+            WHERE s.name = 'Basic Streaming' 
+            AND f.name = 'HD Streaming'
+        </sql>
+        
+        <!-- Link features to Yearly Premium Plan -->
+        <sql>
+            INSERT INTO subscription_features (subscription_id, feature_id)
+            SELECT s.id, f.id
+            FROM subscriptions s, features f
+            WHERE s.name = 'Yearly Premium Plan' 
+            AND f.name IN ('HD Streaming', '4K Streaming', 'Offline Downloads', 'Multiple Devices')
+        </sql>
+        
+        <!-- Link features to Mobile Premium -->
+        <sql>
+            INSERT INTO subscription_features (subscription_id, feature_id)
+            SELECT s.id, f.id
+            FROM subscriptions s, features f
+            WHERE s.name = 'Mobile Premium' 
+            AND f.name IN ('HD Streaming', 'Offline Downloads')
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
+

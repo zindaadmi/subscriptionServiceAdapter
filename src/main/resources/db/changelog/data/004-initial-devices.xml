@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="004-initial-devices" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM devices WHERE name = 'Smart TV Pro 4K'
+            </sqlCheck>
+        </preConditions>
+        
+        <!-- Smart TV Device -->
+        <insert tableName="devices">
+            <column name="name" value="Smart TV Pro 4K"/>
+            <column name="description" value="High-end 4K Smart TV"/>
+            <column name="device_type" value="Smart TV"/>
+            <column name="device_serial" value="TV-PRO-4K-001"/>
+            <column name="api_key" value="550e8400e29b41d4a716446655440000"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <!-- Mobile Device -->
+        <insert tableName="devices">
+            <column name="name" value="Mobile Streaming Device"/>
+            <column name="description" value="Portable device for streaming on the go"/>
+            <column name="device_type" value="Mobile"/>
+            <column name="device_serial" value="MOB-STR-001"/>
+            <column name="api_key" value="660e8400e29b41d4a716446655440001"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
+

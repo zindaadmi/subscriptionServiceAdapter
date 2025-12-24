@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002-initial-users" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM users WHERE username = 'admin'
+            </sqlCheck>
+        </preConditions>
+        
+        <!-- Admin User -->
+        <insert tableName="users">
+            <column name="username" value="admin"/>
+            <column name="email" value="admin@example.com"/>
+            <column name="password" value="$2a$10$rKqJ5qJ5qJ5qJ5qJ5qJ5uO8qJ5qJ5qJ5qJ5qJ5qJ5qJ5qJ5qJ5qJ5q"/> <!-- admin123 - will be updated by DataInitializer if exists -->
+            <column name="mobile_number" value="1112223333"/>
+            <column name="phone_number" value="1112223333"/>
+            <column name="address" value="123 Admin St"/>
+            <column name="city" value="Mumbai"/>
+            <column name="state" value="Maharashtra"/>
+            <column name="zip_code" value="400001"/>
+            <column name="country" value="India"/>
+            <column name="provider" value="LOCAL"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <!-- Agent User -->
+        <insert tableName="users">
+            <column name="username" value="agent"/>
+            <column name="email" value="agent@example.com"/>
+            <column name="password" value="$2a$10$rKqJ5qJ5qJ5qJ5qJ5qJ5uO8qJ5qJ5qJ5qJ5qJ5qJ5qJ5qJ5qJ5qJ5q"/> <!-- agent123 - will be updated by DataInitializer if exists -->
+            <column name="mobile_number" value="4445556666"/>
+            <column name="phone_number" value="4445556666"/>
+            <column name="address" value="456 Agent Ave"/>
+            <column name="city" value="Mumbai"/>
+            <column name="state" value="Maharashtra"/>
+            <column name="zip_code" value="400001"/>
+            <column name="country" value="India"/>
+            <column name="provider" value="LOCAL"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <!-- Regular User -->
+        <insert tableName="users">
+            <column name="username" value="user"/>
+            <column name="email" value="user@example.com"/>
+            <column name="password" value="$2a$10$rKqJ5qJ5qJ5qJ5qJ5qJ5uO8qJ5qJ5qJ5qJ5qJ5qJ5qJ5qJ5qJ5qJ5q"/> <!-- user123 - will be updated by DataInitializer if exists -->
+            <column name="mobile_number" value="7778889999"/>
+            <column name="phone_number" value="7778889999"/>
+            <column name="address" value="789 User Rd"/>
+            <column name="city" value="Mumbai"/>
+            <column name="state" value="Maharashtra"/>
+            <column name="zip_code" value="400001"/>
+            <column name="country" value="India"/>
+            <column name="provider" value="LOCAL"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <!-- Assign roles to admin -->
+        <sql>
+            INSERT INTO user_roles (user_id, role_id)
+            SELECT u.id, r.id
+            FROM users u, roles r
+            WHERE u.username = 'admin' AND r.name IN ('ROLE_ADMIN', 'ROLE_USER')
+        </sql>
+        
+        <!-- Assign roles to agent -->
+        <sql>
+            INSERT INTO user_roles (user_id, role_id)
+            SELECT u.id, r.id
+            FROM users u, roles r
+            WHERE u.username = 'agent' AND r.name IN ('ROLE_AGENT', 'ROLE_USER')
+        </sql>
+        
+        <!-- Assign roles to user -->
+        <sql>
+            INSERT INTO user_roles (user_id, role_id)
+            SELECT u.id, r.id
+            FROM users u, roles r
+            WHERE u.username = 'user' AND r.name = 'ROLE_USER'
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
+

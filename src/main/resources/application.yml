@@ -1,0 +1,138 @@
+application:
+  name: subscription-service
+  version: 1.0.0
+
+server:
+  port: 8080
+  type: jetty
+
+database:
+  type: h2  # h2, mysql, postgresql
+  url: jdbc:h2:mem:subscription_service
+  driver: org.h2.Driver
+  username: sa
+  password: 
+  pool:
+    maxSize: 10
+    minIdle: 5
+    connectionTimeout: 20000
+    idleTimeout: 300000
+    maxLifetime: 1200000
+
+jwt:
+  secret: dev-secret-key-for-development-only-change-in-production-minimum-256-bits-required-for-security
+  accessTokenExpiration: 900000  # 15 minutes
+  refreshTokenExpiration: 604800000  # 7 days
+
+email:
+  enabled: false
+  host: smtp.gmail.com
+  port: 587
+  username: 
+  password: 
+  from:
+
+redis:
+  enabled: true
+  host: localhost
+  port: 6379
+  password: 
+  keyPrefix: subscription:
+  maxConnections: 10 
+
+logging:
+  level: INFO
+  file: logs/application.log
+
+rateLimit:
+  enabled: true
+  maxRequestsPerMinute: 100
+
+services:
+  userService:
+    implementation: com.subscription.subscriptionservice.application.service.UserUseCase
+    scope: singleton
+    
+  authService:
+    implementation: com.subscription.subscriptionservice.application.service.AuthUseCase
+    scope: singleton
+    
+  subscriptionService:
+    implementation: com.subscription.subscriptionservice.application.service.SubscriptionUseCase
+    scope: singleton
+    
+  deviceService:
+    implementation: com.subscription.subscriptionservice.application.service.DeviceUseCase
+    scope: singleton
+    
+  featureService:
+    implementation: com.subscription.subscriptionservice.application.service.FeatureUseCase
+    scope: singleton
+    
+  userSubscriptionService:
+    implementation: com.subscription.subscriptionservice.application.service.UserSubscriptionUseCase
+    scope: singleton
+    
+  userDeviceService:
+    implementation: com.subscription.subscriptionservice.application.service.UserDeviceUseCase
+    scope: singleton
+    
+  billingService:
+    implementation: com.subscription.subscriptionservice.application.service.BillingUseCase
+    scope: singleton
+    
+  auditLogService:
+    implementation: com.subscription.subscriptionservice.application.service.AuditLogUseCase
+    scope: singleton
+
+repositories:
+  userRepository:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.persistence.JdbcUserRepository
+    scope: singleton
+    
+  subscriptionRepository:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.persistence.JdbcSubscriptionRepository
+    scope: singleton
+    
+  deviceRepository:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.persistence.JdbcDeviceRepository
+    scope: singleton
+    
+  featureRepository:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.persistence.JdbcFeatureRepository
+    scope: singleton
+    
+  userSubscriptionRepository:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.persistence.JdbcUserSubscriptionRepository
+    scope: singleton
+    
+  userDeviceRepository:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.persistence.JdbcUserDeviceRepository
+    scope: singleton
+    
+  billingRepository:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.persistence.JdbcBillingRepository
+    scope: singleton
+    
+  auditLogRepository:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.persistence.JdbcAuditLogRepository
+    scope: singleton
+
+transactionManager:
+  implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.persistence.JdbcTransactionManager
+  scope: singleton
+
+adapters:
+  securityAdapter:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.security.JwtSecurityAdapter
+    scope: singleton
+    
+  cacheAdapter:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.cache.RedisCacheAdapter
+    scope: singleton
+    
+  emailAdapter:
+    implementation: com.subscription.subscriptionservice.infrastructure.adapter.outbound.email.SmtpEmailAdapter
+    scope: singleton
+    enabled: false
+

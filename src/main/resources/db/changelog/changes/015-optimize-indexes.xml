@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="015-optimize-indexes" author="system">
+        <comment>Add composite and single column indexes for optimal query performance</comment>
+        
+        <!-- User Subscriptions: Composite index for findByUserAndStatus -->
+        <createIndex indexName="idx_user_subscriptions_user_status" tableName="user_subscriptions">
+            <column name="user_id"/>
+            <column name="status"/>
+        </createIndex>
+        
+        <!-- User Subscriptions: Index for billing_start_date (monthly billing queries) -->
+        <createIndex indexName="idx_user_subscriptions_billing_start_date" tableName="user_subscriptions">
+            <column name="billing_start_date"/>
+        </createIndex>
+        
+        <!-- User Devices: Composite index for findByDeviceIdAndActiveTrue -->
+        <createIndex indexName="idx_user_devices_device_active" tableName="user_devices">
+            <column name="device_id"/>
+            <column name="active"/>
+        </createIndex>
+        
+        <!-- User Devices: Index on user_subscription_id for join performance -->
+        <createIndex indexName="idx_user_devices_user_subscription" tableName="user_devices">
+            <column name="user_subscription_id"/>
+        </createIndex>
+        
+        <!-- Billings: Composite index for common queries (user_subscription_id, status) -->
+        <createIndex indexName="idx_billings_user_subscription_status" tableName="billings">
+            <column name="user_subscription_id"/>
+            <column name="status"/>
+        </createIndex>
+        
+        <!-- Billings: Composite index for overdue queries (status, due_date) -->
+        <createIndex indexName="idx_billings_status_due_date" tableName="billings">
+            <column name="status"/>
+            <column name="due_date"/>
+        </createIndex>
+        
+        <!-- Users: Index on deleted for soft delete queries -->
+        <createIndex indexName="idx_users_deleted" tableName="users">
+            <column name="deleted"/>
+        </createIndex>
+        
+        <!-- Devices: Index on deleted for soft delete queries -->
+        <createIndex indexName="idx_devices_deleted" tableName="devices">
+            <column name="deleted"/>
+        </createIndex>
+        
+        <!-- Subscriptions: Index on deleted for soft delete queries -->
+        <createIndex indexName="idx_subscriptions_deleted" tableName="subscriptions">
+            <column name="deleted"/>
+        </createIndex>
+        
+        <!-- Subscriptions: Composite index for active and deleted queries -->
+        <createIndex indexName="idx_subscriptions_active_deleted" tableName="subscriptions">
+            <column name="active"/>
+            <column name="deleted"/>
+        </createIndex>
+        
+        <!-- Devices: Composite index for active and deleted queries -->
+        <createIndex indexName="idx_devices_active_deleted" tableName="devices">
+            <column name="active"/>
+            <column name="deleted"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+
+

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002-create-users-table" author="system">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="VARCHAR(100)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="mobile_number" type="VARCHAR(20)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="address" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="city" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="state" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="zip_code" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="country" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="provider" type="VARCHAR(20)" defaultValue="LOCAL">
+                <constraints nullable="false"/>
+            </column>
+            <column name="provider_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="deleted_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        
+        <createIndex indexName="idx_users_username" tableName="users">
+            <column name="username"/>
+        </createIndex>
+        <createIndex indexName="idx_users_email" tableName="users">
+            <column name="email"/>
+        </createIndex>
+        <createIndex indexName="idx_users_mobile" tableName="users">
+            <column name="mobile_number"/>
+        </createIndex>
+        <createIndex indexName="idx_users_deleted" tableName="users">
+            <column name="deleted"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+

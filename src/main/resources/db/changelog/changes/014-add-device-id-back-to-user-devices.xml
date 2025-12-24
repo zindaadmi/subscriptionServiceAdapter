@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="014-add-device-id-back-to-user-devices" author="system">
+        <comment>Add device_id column back to user_devices table as the main mapping for tracking devices to users.
+        This allows direct tracking: UserDevice -> Device, and through UserDevice -> UserSubscription -> User.</comment>
+        
+        <!-- Add device_id column -->
+        <addColumn tableName="user_devices">
+            <column name="device_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <!-- Populate device_id from user_subscription -> subscription -> device -->
+        <sql>
+            UPDATE user_devices ud
+            SET device_id = (
+                SELECT s.device_id
+                FROM user_subscriptions us
+                JOIN subscriptions s ON us.subscription_id = s.id
+                WHERE us.id = ud.user_subscription_id
+            )
+            WHERE device_id IS NULL;
+        </sql>
+        
+        <!-- Make device_id NOT NULL after populating -->
+        <addNotNullConstraint tableName="user_devices" columnName="device_id" columnDataType="BIGINT"/>
+        
+        <!-- Add foreign key constraint -->
+        <addForeignKeyConstraint
+            baseTableName="user_devices"
+            baseColumnNames="device_id"
+            constraintName="fk_user_devices_device"
+            referencedTableName="devices"
+            referencedColumnNames="id"/>
+        
+        <!-- Add index for device_id for better query performance -->
+        <createIndex indexName="idx_user_devices_device" tableName="user_devices">
+            <column name="device_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+
+

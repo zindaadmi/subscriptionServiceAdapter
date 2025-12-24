@@ -1,0 +1,36 @@
+application:
+  name: subscription-service-test
+  version: 1.0.0-test
+
+server:
+  port: 8081
+  type: jetty
+
+database:
+  type: h2
+  url: jdbc:h2:mem:test_subscription_service;DB_CLOSE_DELAY=-1;MODE=MySQL
+  driver: org.h2.Driver
+  username: sa
+  password: 
+  pool:
+    maxSize: 5
+    minIdle: 2
+    connectionTimeout: 10000
+    idleTimeout: 300000
+    maxLifetime: 600000
+
+jwt:
+  secret: test-secret-key-for-testing-only
+  accessTokenExpiration: 900000
+  refreshTokenExpiration: 604800000
+
+redis:
+  enabled: false
+
+logging:
+  level: DEBUG
+  file: logs/test-application.log
+
+rateLimit:
+  enabled: false
+

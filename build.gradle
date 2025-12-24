@@ -1,0 +1,129 @@
+plugins {
+	id 'java'
+	id 'application'
+}
+
+group = 'com.subscription'
+version = '1.0.0-SNAPSHOT'
+description = 'Subscription Service - Ports and Adapters Architecture'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+// Framework Core Dependencies
+dependencies {
+	// YAML Configuration
+	implementation 'org.yaml:snakeyaml:2.2'
+	
+	// HTTP Server (Jetty)
+	implementation 'org.eclipse.jetty:jetty-server:11.0.20'
+	implementation 'org.eclipse.jetty:jetty-servlet:11.0.20'
+	// Jakarta Servlet API (required by Jetty 11)
+	implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+	
+	// JSON Processing
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
+	implementation 'com.fasterxml.jackson.core:jackson-core:2.16.1'
+	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.1'
+	
+	// Database Connection Pool
+	implementation 'com.zaxxer:HikariCP:5.1.0'
+	
+	// Database Drivers
+	runtimeOnly 'com.mysql:mysql-connector-j:8.2.0'
+	runtimeOnly 'org.postgresql:postgresql:42.7.1'
+	runtimeOnly 'com.h2database:h2:2.2.224'
+	
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+	
+	// Password Hashing
+	implementation 'org.mindrot:jbcrypt:0.4'
+	
+	// Redis Cache
+	implementation 'redis.clients:jedis:5.1.0'
+	
+	// Email
+	implementation 'com.sun.mail:javax.mail:1.6.2'
+	
+	// PDF Generation
+	implementation 'com.itextpdf:itext7-core:7.2.5'
+	
+	// Database Migrations
+	implementation 'org.liquibase:liquibase-core:4.24.0'
+	
+	// Logging
+	implementation 'org.slf4j:slf4j-api:2.0.9'
+	implementation 'ch.qos.logback:logback-classic:1.4.14'
+	
+	// Lombok
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+}
+
+// Test Dependencies
+dependencies {
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+	testImplementation 'org.mockito:mockito-core:5.7.0'
+	testImplementation 'org.mockito:mockito-junit-jupiter:5.7.0'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// Application plugin configuration
+application {
+	mainClass = 'com.subscription.subscriptionservice.SubscriptionServiceApplication'
+}
+
+// Source sets configuration
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java', 'framework-core/src/main/java']
+		}
+		resources {
+			srcDirs = ['src/main/resources']
+		}
+	}
+	test {
+		java {
+			srcDirs = ['src/test/java']
+		}
+		resources {
+			srcDirs = ['src/test/resources']
+		}
+	}
+}
+
+// JAR task - creates fat JAR with all dependencies
+jar {
+	manifest {
+		attributes(
+			'Main-Class': 'com.subscription.subscriptionservice.SubscriptionServiceApplication',
+			'Implementation-Title': project.name,
+			'Implementation-Version': project.version
+		)
+	}
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	archiveBaseName = 'subscription-service'
+}
+
+// Run task configuration
+run {
+	standardInput = System.in
+}

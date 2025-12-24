@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="003-initial-features" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM features WHERE name = 'HD Streaming'
+            </sqlCheck>
+        </preConditions>
+        
+        <insert tableName="features">
+            <column name="name" value="HD Streaming"/>
+            <column name="description" value="High definition video streaming"/>
+            <column name="feature_code" value="HD_STREAMING"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <insert tableName="features">
+            <column name="name" value="4K Streaming"/>
+            <column name="description" value="Ultra HD video streaming"/>
+            <column name="feature_code" value="4K_STREAMING"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <insert tableName="features">
+            <column name="name" value="Offline Downloads"/>
+            <column name="description" value="Download content for offline viewing"/>
+            <column name="feature_code" value="OFFLINE_DOWNLOADS"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <insert tableName="features">
+            <column name="name" value="Multiple Devices"/>
+            <column name="description" value="Access on multiple devices simultaneously"/>
+            <column name="feature_code" value="MULTIPLE_DEVICES"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+        
+        <insert tableName="features">
+            <column name="name" value="Ad-Free"/>
+            <column name="description" value="No advertisements"/>
+            <column name="feature_code" value="AD_FREE"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
+

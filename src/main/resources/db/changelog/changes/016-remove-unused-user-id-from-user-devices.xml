@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="016-remove-unused-user-id-from-user-devices" author="system">
+        <comment>Remove unused user_id column from user_devices table. 
+        This column is redundant as user_id can be derived from user_subscription_id -> user_subscriptions.user_id.
+        The entity doesn't use this column, so it's safe to remove.</comment>
+        
+        <!-- Check if column exists before dropping (for databases that already have it removed) -->
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="user_devices" columnName="user_id"/>
+        </preConditions>
+        
+        <!-- Drop foreign key constraint if exists -->
+        <dropForeignKeyConstraint 
+            baseTableName="user_devices" 
+            constraintName="fk_user_devices_user"
+            onError="MARK_RAN"/>
+        
+        <!-- Drop index on user_id if exists -->
+        <dropIndex 
+            indexName="idx_user_devices_user" 
+            tableName="user_devices"
+            onError="MARK_RAN"/>
+        
+        <!-- Drop user_id column -->
+        <dropColumn tableName="user_devices" columnName="user_id"/>
+    </changeSet>
+
+</databaseChangeLog>
+
+

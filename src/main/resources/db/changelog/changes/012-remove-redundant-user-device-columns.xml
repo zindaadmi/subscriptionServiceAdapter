@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="012-remove-redundant-user-device-columns" author="system">
+        <comment>Remove redundant device_id and subscription_id columns from user_devices table. 
+        These are redundant because user_subscription_id already provides access to both user and subscription,
+        and subscription provides access to device.</comment>
+        
+        <!-- Drop foreign key constraints first -->
+        <dropForeignKeyConstraint baseTableName="user_devices" constraintName="fk_user_devices_device"/>
+        <dropForeignKeyConstraint baseTableName="user_devices" constraintName="fk_user_devices_subscription"/>
+        
+        <!-- Drop indexes on redundant columns -->
+        <dropIndex indexName="idx_user_devices_device" tableName="user_devices"/>
+        
+        <!-- Drop redundant columns -->
+        <dropColumn tableName="user_devices" columnName="device_id"/>
+        <dropColumn tableName="user_devices" columnName="subscription_id"/>
+        
+        <!-- Note: user_id column was also redundant but keeping it for backward compatibility if needed
+             Actually, user_id is also redundant since user_subscription_id provides access to user
+             However, we'll keep it for now to avoid breaking existing code that might query by user_id directly
+             This can be removed in a future migration if needed -->
+    </changeSet>
+
+</databaseChangeLog>
+
+

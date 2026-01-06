@@ -16,5 +16,6 @@ public interface BillingServicePort {
     void markAsOverdue(Long id);
     void generateMonthlyBills();
     void markOverdueBills();
+    void suspendSubscriptionsWithOverdueBills();
 }
 

@@ -76,8 +76,30 @@ public class SubscriptionServiceApplication {
             System.out.println("Starting Subscription Service...");
             bootstrap.start();
             
+            // Start scheduled tasks
+            com.subscription.subscriptionservice.application.port.inbound.BillingServicePort billingService = 
+                container.getBean(com.subscription.subscriptionservice.application.port.inbound.BillingServicePort.class);
+            
+            // Read scheduled tasks configuration
+            java.util.Map<String, Object> config = container.getBean(java.util.Map.class);
+            boolean scheduledTasksEnabled = true; // default
+            if (config.containsKey("scheduledTasks")) {
+                java.util.Map<String, Object> scheduledTasksConfig = (java.util.Map<String, Object>) config.get("scheduledTasks");
+                if (scheduledTasksConfig.containsKey("enabled")) {
+                    scheduledTasksEnabled = Boolean.parseBoolean(scheduledTasksConfig.get("enabled").toString());
+                }
+            }
+            
+            com.subscription.subscriptionservice.infrastructure.util.ScheduledTaskService scheduledTaskService = 
+                new com.subscription.subscriptionservice.infrastructure.util.ScheduledTaskService(billingService, scheduledTasksEnabled);
+            scheduledTaskService.start();
+            
             System.out.println("Subscription Service started successfully!");
             System.out.println("Server running on port 8080");
+            System.out.println("Scheduled tasks enabled:");
+            System.out.println("  - Generate monthly bills: Daily at 2 AM");
+            System.out.println("  - Mark overdue bills: Daily at 3 AM");
+            System.out.println("  - Suspend subscriptions with overdue bills: Daily at 4 AM");
             System.out.println("Press Ctrl+C to stop");
             
             // Enhanced graceful shutdown
@@ -88,9 +110,13 @@ public class SubscriptionServiceApplication {
                     30 // 30 second timeout
                 );
             
+            // Store scheduledTaskService for shutdown
+            final com.subscription.subscriptionservice.infrastructure.util.ScheduledTaskService finalScheduledTaskService = scheduledTaskService;
+            
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
                     System.out.println("\nReceived shutdown signal, initiating graceful shutdown...");
+                    finalScheduledTaskService.stop();
                     gracefulShutdown.shutdown();
                     System.out.println("Shutdown complete");
                 } catch (Exception e) {

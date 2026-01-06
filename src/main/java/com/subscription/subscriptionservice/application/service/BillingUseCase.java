@@ -135,5 +135,30 @@ public class BillingUseCase implements BillingServicePort {
             }
         }
     }
+
+    @Override
+    public void suspendSubscriptionsWithOverdueBills() {
+        logger.info("Suspending subscriptions with overdue bills");
+        List<Billing> overdueBills = billingRepository.findOverdue();
+        
+        for (Billing billing : overdueBills) {
+            // Only suspend if bill is overdue for more than 7 days (grace period)
+            LocalDate overdueDate = billing.getDueDate();
+            LocalDate today = LocalDate.now();
+            long daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(overdueDate, today);
+            
+            if (daysOverdue > 7) { // 7 days grace period
+                UserSubscription subscription = userSubscriptionRepository.findById(billing.getUserSubscriptionId())
+                    .orElse(null);
+                
+                if (subscription != null && subscription.isActive()) {
+                    subscription.suspend();
+                    userSubscriptionRepository.save(subscription);
+                    logger.info("Suspended subscription {} due to overdue bill {}", 
+                        subscription.getId(), billing.getId());
+                }
+            }
+        }
+    }
 }
 

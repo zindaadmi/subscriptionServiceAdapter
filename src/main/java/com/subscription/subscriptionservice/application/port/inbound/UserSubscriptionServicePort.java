@@ -17,5 +17,7 @@ public interface UserSubscriptionServicePort {
     UserSubscription updateNegotiatedPrice(Long id, BigDecimal negotiatedPrice);
     void cancelSubscription(Long id);
     void cancelUserSubscription(Long userId, Long subscriptionId);
+    void suspendSubscription(Long id);
+    void reactivateSubscription(Long id);
 }
 

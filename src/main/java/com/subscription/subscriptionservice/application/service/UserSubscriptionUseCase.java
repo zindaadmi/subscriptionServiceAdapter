@@ -121,5 +121,21 @@ public class UserSubscriptionUseCase implements UserSubscriptionServicePort {
         }
         throw new UserNotFoundException("Active subscription not found for user: " + userId + ", subscription: " + subscriptionId);
     }
+
+    @Override
+    public void suspendSubscription(Long id) {
+        UserSubscription userSubscription = findById(id);
+        userSubscription.suspend();
+        userSubscriptionRepository.save(userSubscription);
+        logger.info("Subscription suspended: id={}", id);
+    }
+
+    @Override
+    public void reactivateSubscription(Long id) {
+        UserSubscription userSubscription = findById(id);
+        userSubscription.reactivate();
+        userSubscriptionRepository.save(userSubscription);
+        logger.info("Subscription reactivated: id={}", id);
+    }
 }
 

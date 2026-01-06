@@ -46,8 +46,24 @@ public class UserSubscription {
         this.endDate = LocalDate.now();
     }
 
+    public void suspend() {
+        if (this.status == SubscriptionStatus.ACTIVE) {
+            this.status = SubscriptionStatus.SUSPENDED;
+        }
+    }
+
+    public void reactivate() {
+        if (this.status == SubscriptionStatus.SUSPENDED) {
+            this.status = SubscriptionStatus.ACTIVE;
+        }
+    }
+
     public boolean isExpired() {
         return endDate != null && endDate.isBefore(LocalDate.now());
+    }
+
+    public boolean isSuspended() {
+        return status == SubscriptionStatus.SUSPENDED;
     }
 }
 

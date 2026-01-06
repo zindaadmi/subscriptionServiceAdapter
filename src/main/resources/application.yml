@@ -48,6 +48,14 @@ rateLimit:
   enabled: true
   maxRequestsPerMinute: 100
 
+scheduledTasks:
+  enabled: true
+  # Scheduled tasks run automatically:
+  # - Generate monthly bills: Daily at 2 AM
+  # - Mark overdue bills: Daily at 3 AM
+  # - Suspend subscriptions with overdue bills: Daily at 4 AM
+  # Grace period for suspension: 7 days after bill due date
+
 services:
   userService:
     implementation: com.subscription.subscriptionservice.application.service.UserUseCase

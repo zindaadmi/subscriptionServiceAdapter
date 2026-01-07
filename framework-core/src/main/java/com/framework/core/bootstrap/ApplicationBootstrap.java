@@ -75,11 +75,13 @@ public class ApplicationBootstrap {
                     continue;
                 }
                 
-                // Special handling for JwtSecurityAdapter - needs JWT config
+                // Special handling for adapters that need configuration
                 if ("securityAdapter".equals(beanName)) {
                     registerSecurityAdapter(beanConfig);
                 } else if ("cacheAdapter".equals(beanName)) {
                     registerCacheAdapter(beanConfig);
+                } else if ("emailAdapter".equals(beanName)) {
+                    registerEmailAdapter(beanConfig);
                 } else {
                     registerBean(beanName, beanConfig);
                 }
@@ -155,6 +157,53 @@ public class ApplicationBootstrap {
         } catch (Exception e) {
             System.err.println("Warning: Failed to register cache adapter: " + e.getMessage());
             // Don't throw - cache is optional
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void registerEmailAdapter(Map<String, Object> beanConfig) {
+        try {
+            // Get email configuration
+            Map<String, Object> emailConfig = (Map<String, Object>) configuration.get("email");
+            if (emailConfig == null) {
+                System.out.println("Warning: Email configuration not found, skipping email adapter");
+                return;
+            }
+            
+            Boolean enabled = emailConfig.get("enabled") != null ? 
+                ((Boolean) emailConfig.get("enabled")) : false;
+            if (!enabled) {
+                System.out.println("Email service is disabled, skipping email adapter");
+                return;
+            }
+            
+            String host = (String) emailConfig.get("host");
+            if (host == null) host = "smtp.gmail.com";
+            
+            Integer port = emailConfig.get("port") != null ?
+                ((Number) emailConfig.get("port")).intValue() : 587;
+            
+            String username = (String) emailConfig.get("username");
+            String password = (String) emailConfig.get("password");
+            String fromEmail = (String) emailConfig.get("from");
+            
+            if (username == null || password == null || fromEmail == null ||
+                username.isEmpty() || password.isEmpty() || fromEmail.isEmpty()) {
+                System.out.println("Warning: Email configuration incomplete, skipping email adapter");
+                return;
+            }
+            
+            // Create SmtpEmailAdapter instance
+            Class<?> clazz = Class.forName((String) beanConfig.get("implementation"));
+            Constructor<?> constructor = clazz.getConstructor(String.class, int.class, String.class, String.class, String.class);
+            Object instance = constructor.newInstance(host, port, username, password, fromEmail);
+            
+            // Register as singleton
+            container.registerSingleton(clazz, instance);
+            System.out.println("Registered adapter: emailAdapter -> " + beanConfig.get("implementation"));
+        } catch (Exception e) {
+            System.err.println("Warning: Failed to register email adapter: " + e.getMessage());
+            // Don't throw - email is optional
         }
     }
     
@@ -235,6 +284,20 @@ public class ApplicationBootstrap {
                             }
                         } catch (Exception e) {
                             // Cache is optional - ignore if not available
+                        }
+                    }
+                    
+                    // Special handling: Set email port in BillingUseCase if email adapter is available
+                    if ("billingService".equals(beanName) && instance instanceof com.subscription.subscriptionservice.application.service.BillingUseCase) {
+                        try {
+                            com.subscription.subscriptionservice.application.port.outbound.EmailPort emailPort = 
+                                container.getBean(com.subscription.subscriptionservice.application.port.outbound.EmailPort.class);
+                            if (emailPort != null) {
+                                ((com.subscription.subscriptionservice.application.service.BillingUseCase) instance).setEmailPort(emailPort);
+                                System.out.println("Email port set in BillingUseCase");
+                            }
+                        } catch (Exception e) {
+                            // Email is optional - ignore if not available
                         }
                     }
                 } catch (Exception e) {

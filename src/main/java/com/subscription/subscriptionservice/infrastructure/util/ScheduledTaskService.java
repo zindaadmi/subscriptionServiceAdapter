@@ -41,7 +41,7 @@ public class ScheduledTaskService {
         
         logger.info("Starting scheduled tasks...");
         
-        // Task 1: Generate monthly bills - runs daily at 2 AM
+        // Task 1: Generate monthly bills - runs daily at 2 AM, but only executes on last day of month
         // Calculate delay to next 2 AM
         long delayTo2AM = calculateDelayToHour(2);
         scheduler.scheduleAtFixedRate(
@@ -50,7 +50,7 @@ public class ScheduledTaskService {
             24 * 60 * 60 * 1000, // 24 hours
             TimeUnit.MILLISECONDS
         );
-        logger.info("Scheduled: Generate monthly bills (daily at 2 AM)");
+        logger.info("Scheduled: Generate monthly bills (daily at 2 AM, executes on last day of month)");
         
         // Task 2: Mark overdue bills - runs daily at 3 AM
         long delayTo3AM = calculateDelayToHour(3);
@@ -108,12 +108,22 @@ public class ScheduledTaskService {
     
     /**
      * Task: Generate monthly bills for all active subscriptions
+     * Runs on the last day of each month at 2 AM
      */
     private void generateMonthlyBills() {
         try {
-            logger.info("Running scheduled task: Generate monthly bills");
-            billingService.generateMonthlyBills();
-            logger.info("Completed scheduled task: Generate monthly bills");
+            java.time.LocalDate today = java.time.LocalDate.now();
+            java.time.LocalDate lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+            
+            // Only generate bills on the last day of the month
+            if (today.equals(lastDayOfMonth)) {
+                logger.info("Running scheduled task: Generate monthly bills (Last day of month)");
+                billingService.generateMonthlyBills();
+                logger.info("Completed scheduled task: Generate monthly bills");
+            } else {
+                logger.debug("Skipping bill generation - not the last day of month. Today: {}, Last day: {}", 
+                    today, lastDayOfMonth);
+            }
         } catch (Exception e) {
             logger.error("Error in scheduled task: Generate monthly bills", e);
         }
@@ -145,4 +155,5 @@ public class ScheduledTaskService {
         }
     }
 }
+
 

@@ -14,6 +14,10 @@ logs/
 *.log
 *.log.*
 
+# Generated PDFs
+bills/
+*.pdf
+
 # Node.js / Frontend
 node_modules/
 npm-debug.log*

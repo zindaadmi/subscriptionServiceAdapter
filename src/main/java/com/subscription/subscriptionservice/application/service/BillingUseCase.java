@@ -3,10 +3,13 @@ package com.subscription.subscriptionservice.application.service;
 import com.subscription.subscriptionservice.application.port.inbound.BillingServicePort;
 import com.subscription.subscriptionservice.application.port.outbound.BillingRepositoryPort;
 import com.subscription.subscriptionservice.application.port.outbound.TransactionManager;
+import com.subscription.subscriptionservice.application.port.outbound.UserRepositoryPort;
 import com.subscription.subscriptionservice.application.port.outbound.UserSubscriptionRepositoryPort;
 import com.subscription.subscriptionservice.domain.exception.UserNotFoundException;
 import com.subscription.subscriptionservice.domain.model.Billing;
+import com.subscription.subscriptionservice.domain.model.User;
 import com.subscription.subscriptionservice.domain.model.UserSubscription;
+import com.subscription.subscriptionservice.infrastructure.util.BillPdfGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,14 +23,19 @@ public class BillingUseCase implements BillingServicePort {
     
     private final BillingRepositoryPort billingRepository;
     private final UserSubscriptionRepositoryPort userSubscriptionRepository;
+    private final UserRepositoryPort userRepository;
     private final TransactionManager transactionManager;
+    private final BillPdfGenerator pdfGenerator;
     
     public BillingUseCase(BillingRepositoryPort billingRepository,
                          UserSubscriptionRepositoryPort userSubscriptionRepository,
+                         UserRepositoryPort userRepository,
                          TransactionManager transactionManager) {
         this.billingRepository = billingRepository;
         this.userSubscriptionRepository = userSubscriptionRepository;
+        this.userRepository = userRepository;
         this.transactionManager = transactionManager;
+        this.pdfGenerator = new BillPdfGenerator();
     }
     
     @Override
@@ -37,6 +45,9 @@ public class BillingUseCase implements BillingServicePort {
         return transactionManager.executeInTransaction(() -> {
             UserSubscription userSubscription = userSubscriptionRepository.findById(userSubscriptionId)
                 .orElseThrow(() -> new UserNotFoundException("User subscription not found with id: " + userSubscriptionId));
+            
+            User user = userRepository.findById(userSubscription.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userSubscription.getUserId()));
             
             Billing billing = new Billing();
             billing.setUserSubscriptionId(userSubscriptionId);
@@ -50,7 +61,21 @@ public class BillingUseCase implements BillingServicePort {
             billing.setDueDate(LocalDate.now().plusDays(30)); // 30 days payment term
             billing.setStatus(Billing.BillingStatus.PENDING);
             
-            return billingRepository.save(billing);
+            // Save billing first to get the ID
+            billing = billingRepository.save(billing);
+            
+            // Generate PDF
+            try {
+                String pdfPath = pdfGenerator.generateBillPdf(billing, user, userSubscription);
+                billing.setPdfPath(pdfPath);
+                billing = billingRepository.save(billing);
+                logger.info("PDF bill generated successfully: {}", pdfPath);
+            } catch (Exception e) {
+                logger.error("Failed to generate PDF for bill id: {}", billing.getId(), e);
+                // Continue even if PDF generation fails
+            }
+            
+            return billing;
         });
     }
     

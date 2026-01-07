@@ -97,7 +97,7 @@ public class SubscriptionServiceApplication {
             System.out.println("Subscription Service started successfully!");
             System.out.println("Server running on port 8080");
             System.out.println("Scheduled tasks enabled:");
-            System.out.println("  - Generate monthly bills: Daily at 2 AM");
+            System.out.println("  - Generate monthly bills: Last day of month at 2 AM (with PDF)");
             System.out.println("  - Mark overdue bills: Daily at 3 AM");
             System.out.println("  - Suspend subscriptions with overdue bills: Daily at 4 AM");
             System.out.println("Press Ctrl+C to stop");
